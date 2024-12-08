@@ -1,0 +1,12 @@
+{
+    "cecLong": "Civil Engineering Club",
+    "@cecLong": {
+      "description": "The long form for CEC"
+    },
+    "home": "Home",
+    "events": "Events",
+    "membership": "Membership",
+    "aboutus": "About Us",
+    "signin": "Sign In",
+    "cecSlogan": "Building the Foundations of Tomorrow"
+  }

@@ -1,5 +1,13 @@
+import 'dart:async';
+
+import 'package:ceclub/Tabs/aboutus.dart';
+import 'package:ceclub/Tabs/events.dart';
+import 'package:ceclub/Tabs/home.dart';
+import 'package:ceclub/Tabs/membership.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+final StreamController<bool> isLightTheme = StreamController();
 
 void main() {
   runApp(const MyApp());
@@ -11,44 +19,26 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+    return StreamBuilder<bool>(
+        initialData: true,
+        stream: isLightTheme.stream,
+        builder: (context, snapshot) {
+          return MaterialApp(
+            title: 'CE Club',
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData.light(),
+            darkTheme: ThemeData.dark(useMaterial3: true),
+            themeMode: snapshot.data! ? ThemeMode.light : ThemeMode.dark,
+            home: const MyHomePage(title: 'Civil Engineering Club'),
+          );
+        });
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -62,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     tabController =
-        TabController(length: 5, vsync: this, animationDuration: Duration.zero);
+        TabController(length: 4, vsync: this, animationDuration: Duration.zero);
     super.initState();
   }
 
@@ -70,35 +60,58 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     tabController.animateTo(index);
   }
 
+  bool selectedIsLightTheme = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: const Icon(Icons.chat_rounded),
+        leading: const Image(
+          image: AssetImage('ceclub_logo.png'),
+        ),
         centerTitle: true,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextButton(
-                onPressed: () => setTabIndex(0), child: const Text('Home')),
+                onPressed: () => setTabIndex(0),
+                child: Text(AppLocalizations.of(context)!.home)),
             TextButton(
-                onPressed: () => setTabIndex(1), child: const Text('Events')),
+                onPressed: () => setTabIndex(1),
+                child: Text(AppLocalizations.of(context)!.events)),
             TextButton(
                 onPressed: () => setTabIndex(2),
-                child: const Text('Membership')),
+                child: Text(AppLocalizations.of(context)!.membership)),
             TextButton(
-                onPressed: () => setTabIndex(3), child: const Text('About Us'))
+                onPressed: () => setTabIndex(3),
+                child: Text(AppLocalizations.of(context)!.aboutus))
           ],
         ),
         actions: [
+          const Icon(Icons.light_mode),
+          Switch(
+              value: !selectedIsLightTheme,
+              activeColor: Colors.blue,
+              onChanged: (bool value) {
+                setState(() {
+                  selectedIsLightTheme = !value;
+                });
+                Future.delayed(Durations.short2, () {
+                  isLightTheme.add(!value);
+                });
+              }),
+          const Icon(Icons.dark_mode),
+          const SizedBox(
+            width: 5,
+          ),
           OutlinedButton(
               onPressed: () {},
-              child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                Padding(
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                const Padding(
                     padding: EdgeInsets.only(top: 5, bottom: 5, right: 5),
                     child: Icon(Icons.logout)),
-                Text('Sign In'),
-                SizedBox(
+                Text(AppLocalizations.of(context)!.signin),
+                const SizedBox(
                   width: 10,
                 ),
               ]))
@@ -106,12 +119,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
       body: TabBarView(
         controller: tabController,
-        children: const [Text('Hii'), Text('Ola'), Text('ss'), Text('jj')],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        children: const [TabHome(), TabEvents(), TabMembership(), TabAboutUs()],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
